@@ -1,0 +1,17 @@
+qdrant-client
+pydantic
+pydantic-settings
+tqdm
+fastapi
+uvicorn
+sentence-transformers
+fastapi-pagination
+'markitdown[all]'
+sentence_transformers
+python-multipart
+fastembed
+langchain
+langchain-community
+langchain_qdrant
+fastembed
+langchain_huggingface
