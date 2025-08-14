@@ -1,18 +1,21 @@
 import warnings
 
 import uvicorn
-from api.v1.api import api_v1
+from api.api import api_v1
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 # from fastapi_pagination import add_pagination
-
+import os 
+from dotenv import load_dotenv
+load_dotenv()
 # ----------------------------------------------------------------
 warnings.filterwarnings("ignore")
 
+from starlette.middleware.sessions import SessionMiddleware
 
 api = FastAPI(
-    title="Qdrant_search", description="Qdrant_search BACKEND", version="1.0.0", root_path="/api/v2"
+    title="Student Asisstant", description="Student Asisstant BACKEND", version="1.0.0", root_path="/api/v2"
 )
 # add_pagination(api)
 # ----------------------------------------------------------------
@@ -25,6 +28,7 @@ api.add_middleware(
 )
 api.include_router(api_v1)
 api.add_middleware(GZipMiddleware, minimum_size=5000, compresslevel=3)
+api.add_middleware(SessionMiddleware, secret_key=os.getenv("SESSION_SECRET_KEY", "super-secret"))
 
 
 @api.get("/")

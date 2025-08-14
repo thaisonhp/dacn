@@ -5,12 +5,12 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from utils.indexing import IndexingPipeline
 from core.config import settings
 from pathlib import Path
-
+from core.config import settings
 index_router = APIRouter(prefix="/Index", tags=["Indexing"])
 
 
 # Create a neural searcher instance
-indexer = IndexingPipeline()
+indexer = IndexingPipeline(collection_name=settings.collection_name)
 
 
 UPLOAD_DIR = Path("file_upload")

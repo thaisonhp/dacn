@@ -6,7 +6,7 @@ fastapi
 uvicorn
 sentence-transformers
 fastapi-pagination
-'markitdown[all]'
+markitdown[all]
 sentence_transformers
 python-multipart
 fastembed
