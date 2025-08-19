@@ -1,15 +1,18 @@
 from pydantic import BaseModel
-
+from bunnet import Document, PydanticObjectId
+from typing import List , Optional
+from datetime import datetime
+from pydantic import Field
 
 class CreateChatModel(BaseModel):
-    vector_store_id: list[str] = []
-    library_id: list[str] = []
-    mcp_server: bool = False
-    qa: list[str] = []
     model: str = "gpt-4o-mini"
     name: str = None
-    owner: str
-    prompt: str = None
-    chatbot_id: str
-    max_doc: int = 20
+    description_assistant: str = None
     temperature: float = 0.2
+    opening_greeting : str = None 
+    list_knowledge_base_id : List[PydanticObjectId]
+    prompt: str = None
+    max_doc: int = 20
+    createdAt: Optional[datetime] = Field(default_factory=datetime.now)
+    updatedAt: Optional[datetime] = Field(default_factory=datetime.now)
+

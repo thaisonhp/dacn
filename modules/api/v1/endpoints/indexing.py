@@ -6,6 +6,7 @@ from utils.indexing import IndexingPipeline
 from core.config import settings
 from pathlib import Path
 from core.config import settings
+from utils.manager.file_manager import MinioManager
 index_router = APIRouter(prefix="/Index", tags=["Indexing"])
 
 
@@ -31,6 +32,8 @@ async def index_file(
     with open(file_path, "wb") as buffer:
         buffer.write(await file.read())
     # Index file vào Qdrant
+    minio_processor = MinioManager()
+    # minio_processor.save_to_minio(file=file,file_stream=)
     try:
         count = await indexer.add_file(
             file_path=str(file_path)

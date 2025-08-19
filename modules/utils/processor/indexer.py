@@ -12,7 +12,7 @@ from langchain_openai import OpenAIEmbeddings
 from qdrant_client.models import PointStruct
 from utils.embedder import Embedder
 from qdrant_client import QdrantClient, models
-
+# from utils.manager.file_manager import MinioManager
 load_dotenv()
 
 
@@ -50,6 +50,7 @@ class Indexer:
                 wait=True
             )
         print(f"✅ Indexed {len(texts)} documents into '{self.collection_name}'")
+        # ======= sau khi xong het phan luu vao vector store thi bat dau luu vao minio va lay ra url luu vao db 
         return len(texts)
 
     async def search(self, query: str, limit: int = 5)->List[str]:

@@ -9,7 +9,7 @@ from pydantic import Field
 
 
 class Conversation(Document):
-    id: PydanticObjectId
+    id: Optional[PydanticObjectId] = Field(default=None, alias="_id")  # ⚡ fix lỗi _id
     chat_model: str
     user: str
     status: Literal["activate", "inactivate", "delete"] = "activate"

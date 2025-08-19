@@ -1,30 +1,32 @@
 from bson import ObjectId
 from bunnet import init_bunnet
 from core.config import db_async, db_sync, settings
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, HTTPException ,Depends
 from fastapi.responses import JSONResponse, Response
 from models.chat_model import ChatModel
 from schema.chat_model import CreateChatModel
-
+from schema.promt_engine import PromtEngine
+from schema.model_setting import ModelSetting
+from bunnet import PydanticObjectId
+from core.security import get_current_user_id
 # -------------------------------------------------
 chat_model_router = APIRouter(prefix="/chat-model", tags=["Chat Model"])
 
 
 @chat_model_router.post("/create")
-async def create_chat_model(data: CreateChatModel, background_tasks: BackgroundTasks):
+async def create_chat_model(data: CreateChatModel, background_tasks: BackgroundTasks ,user_id : str = Depends(get_current_user_id) ):
     init_bunnet(database=db_sync, document_models=[ChatModel])
     id = str(ObjectId())
     chat_model = ChatModel(
-        vector_store_id=data.vector_store_id,
-        library_id=data.library_id,
-        mcp_server=data.mcp_server,
+        user_id=user_id,
         name=data.name,
-        owner=data.owner,
-        prompt=data.prompt,
-        qa=data.qa,
+        decription_assistant =data.description_assistant,
+        opening_greeting=data.opening_greeting,
+        list_knowledge_base_id=data.list_knowledge_base_id,
         model=data.model,
-        id=id,
-        chatbot_id=data.chatbot_id,
+        prompt=data.prompt,
+        max_doc=data.max_doc,
+        temperature=data.temperature
     )
     background_tasks.add_task(chat_model.insert)
     return JSONResponse(

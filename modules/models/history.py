@@ -8,7 +8,7 @@ from pydantic import Field
 
 # -------------------------------------------------
 class History(Document):
-    id: PydanticObjectId | None
+    id: Optional[PydanticObjectId] = Field(default=None, alias="_id")  # ⚡ fix lỗi _id
     conversation_id: PydanticObjectId
     question: str = None
     answer: str = None

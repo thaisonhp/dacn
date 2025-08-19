@@ -9,8 +9,12 @@ from pydantic import Field
 
 
 class ChatModel(Document):
-    id: PydanticObjectId
+    id: Optional[PydanticObjectId] = Field(default=None, alias="_id")  # ⚡ fix lỗi _id
+    user_id : PydanticObjectId
     name: str = None
+    decription_assistant : str = None 
+    opening_greeting : str = None 
+    list_knowledge_base_id : List[PydanticObjectId]
     model: str = "gpt-4o-mini"
     prompt: str = None
     max_doc: int = 20

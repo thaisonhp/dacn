@@ -62,15 +62,20 @@ async def get_conversation(conversation_id: str):
 
 @conversation_router.get("/conversation/list")
 async def list_conversations(
-    user: str = Query(...), chat_model: str = Query(...)
+    # user: str = Query(...), chat_model: str = Query(...)
+    conversation_id: str
 ) -> Page[ListConversationOut]:
-
     conversations = (
-        await db_async["Conversation"]
-        .find({"user": user, "deleted": False, "chat_model": chat_model})
-        .sort("createdAt", -1)
+        await db_async["History"]
+        .find({"conversation_id": ObjectId(conversation_id)})
         .to_list()
     )
+    # conversations = (
+    #     await db_async["Conversation"]
+    #     .find({"user": user, "deleted": False, "chat_model": chat_model})
+    #     .sort("createdAt", -1)
+    #     .to_list()
+    # )
     return paginate([clean_conversation_item(item) for item in conversations])
 
 
