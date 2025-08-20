@@ -5,6 +5,7 @@ from api.api import api_v1
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
+from api.v2.endpoints.auth import auth_router_v2  # Điều chỉnh đường dẫn theo dự án của bạn
 # from fastapi_pagination import add_pagination
 import os 
 from dotenv import load_dotenv
@@ -16,6 +17,12 @@ from starlette.middleware.sessions import SessionMiddleware
 
 api = FastAPI(
     title="Student Asisstant", description="Student Asisstant BACKEND", version="1.0.0", root_path="/api/v2"
+)
+api.add_middleware(
+    SessionMiddleware,
+    secret_key=os.getenv("SECRET_KEY"),  # Dùng cùng SECRET_KEY từ .env
+    session_cookie="session",
+    max_age=3600,  # Session hết hạn sau 1 giờ
 )
 # add_pagination(api)
 # ----------------------------------------------------------------

@@ -16,7 +16,7 @@ async def save_otp_to_db(email: str, otp: str):
     """Lưu OTP vào DB"""
     init_bunnet(database=db_sync, document_models=[OtpCode])
     otp_doc = OtpCode(email=email, otp=otp)
-    await otp_doc.insert()
+    otp_doc.insert()
     return otp_doc
 
 
