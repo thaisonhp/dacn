@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-
+from io import BytesIO
 # The file where HybridSearcher is stored
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from utils.indexing import IndexingPipeline
@@ -28,12 +28,21 @@ async def index_file(
         "text/markdown",
     ]:
         raise HTTPException(status_code=400, detail="Unsupported file type.")
-    file_path = UPLOAD_DIR / file.filename
-    with open(file_path, "wb") as buffer:
-        buffer.write(await file.read())
-    # Index file vào Qdrant
+    # Đọc nội dung file vào bytes
+    file_content = await file.read()
+    file_stream = BytesIO(file_content)
+    # file_path = UPLOAD_DIR / file.filename
+    # with open(file_path, "wb") as buffer:
+    #     buffer.write(await file.read())
+    # # Index file vào Qdrant
     minio_processor = MinioManager()
-    # minio_processor.save_to_minio(file=file,file_stream=)
+    try :
+        print("check minio")
+        file_path = minio_processor.save_to_minio(file=file,file_stream=file_stream)
+        print(file_path)
+    except Exception as e:
+        raise HTTPException(status_code= 400, detail="False to save to minio") 
+        
     try:
         count = await indexer.add_file(
             file_path=str(file_path)

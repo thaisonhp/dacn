@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from api.v1.endpoints.indexing import index_router
 from api.v1.endpoints.search import search_router
 from api.v1.endpoints.manage_conservation import conversation_router
-from api.v1.endpoints.manage_chatmodel import chat_model_router
+from api.v1.endpoints.manage_assistant import chat_model_router
 from api.v1.endpoints.chat import chat_router
 from api.v1.endpoints.auth import auth_router
 from api.v2.endpoints.auth import auth_router_v2

@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     mongodb_db: str = os.getenv("MONGODB_DB", "testdb")
     embedding_model: str = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
     # Các biến môi trường khác nếu cần thiết
-    minio_endpoint: str = os.getenv("MINIO_ENDPOINT", "http://localhost:9000")
+    minio_endpoint: str = os.getenv("MINIO_ENDPOINT", "http://localhost:9001")
     minio_access_key : str = os.getenv("MINIO_ACCESS_KEY")
     minio_secret_key : str = os.getenv("MINIO_SECRET_KEY")
     minio_bucket: str = os.getenv("MINIO_BUCKET", "mybucket")

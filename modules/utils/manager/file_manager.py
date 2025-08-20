@@ -1,37 +1,44 @@
 import logging
-import os
-import uuid
 from io import BytesIO
-from typing import List, Optional
-from dotenv import load_dotenv
-from fastapi import UploadFile, HTTPException, status
+from fastapi import HTTPException, status, UploadFile
 from minio import Minio
 from minio.error import S3Error
-from openai import OpenAI
-from minio import Minio
-from bunnet import PydanticObjectId
-from core.config import settings , openai_client , logger , minio_client
-# Load biến môi trường từ file .env
-load_dotenv()
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+from core.config import settings
 
 logger = logging.getLogger(__name__)
 
 class MinioManager:
-    def __init__(self, minio_config: dict):
+    def __init__(self, minio_config: dict = None):
         """Khởi tạo FileManager với cấu hình MinIO"""
-        self.client = minio_client
         self.bucket_name = (
             minio_config.get("bucket") if minio_config else settings.minio_bucket
         )
-    async def save_to_minio(self, file: UploadFile, file_stream: BytesIO) -> str:
-        """Lưu file lên MinIO và trả về URL hoặc path của tài liệu"""
-        try:
-            file_stream.seek(0)  # Reset vị trí đọc
+        self.client = Minio(
+            endpoint=settings.minio_endpoint or "localhost:9001",
+            access_key=settings.minio_access_key or "minioadmin",
+            secret_key=settings.minio_secret_key or "minioadmin",
+            secure=False
+        )
 
+        try:
             if not self.client.bucket_exists(self.bucket_name):
+                logger.debug(f"Creating bucket {self.bucket_name}")
                 self.client.make_bucket(self.bucket_name)
+                logger.info(f"Created bucket {self.bucket_name}")
+        except S3Error as e:
+            logger.error(f"Failed to initialize bucket {self.bucket_name}: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to initialize MinIO bucket: {str(e)}"
+            )
+
+    def save_to_minio(self, file: UploadFile, file_stream: BytesIO) -> str:
+        """Lưu file lên MinIO và trả về URL của tài liệu"""
+        try:
+            logger.debug(f"Starting upload of {file.filename} to MinIO")
+            file_stream.seek(0)  # Reset vị trí đọc
             object_name = f"origin/{file.filename}"
+
             self.client.put_object(
                 bucket_name=self.bucket_name,
                 object_name=object_name,
@@ -39,17 +46,17 @@ class MinioManager:
                 length=len(file_stream.getvalue()),
                 content_type=file.content_type
             )
-            logger.info(f"File {file.filename} uploaded to MinIO successfully")
+            logger.info(f"File {file.filename} uploaded to MinIO successfully at {object_name}")
 
-            # Tạo URL đầy đủ (thay đổi endpoint theo cấu hình MinIO của bạn)
-            # minio_endpoint = "http://61.28.231.71:9001/browser"  
-            file_path = f"{self.bucket_name}/{file.filename}"
-            # file_url = f"{minio_endpoint}/{file_path}"
-            return file_path  # Ví dụ: "http://localhost:9000/documents/report.pdf"
+            # Tạo URL đầy đủ
+            minio_endpoint = settings.minio_endpoint or "localhost:9001"
+            file_url = f"http://{minio_endpoint}/{self.bucket_name}/{object_name}"
+            logger.debug(f"Generated file URL: {file_url}")
+            return file_url
 
         except S3Error as e:
-            logger.error(f"MinIO error: {str(e)}")
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to upload file to MinIO")
-
-
-
+            logger.error(f"MinIO error for {file.filename}: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to upload file to MinIO: {str(e)}"
+            )

@@ -11,7 +11,7 @@ class SignupSchema(BaseModel):
     full_name: Optional[str] = None
     otp_code: Optional[str] = None
     password: str
-    role: str
+    role: Optional[str] = None
     google_id: Optional[str] = None
 
 

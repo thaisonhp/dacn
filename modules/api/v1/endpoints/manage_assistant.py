@@ -3,8 +3,8 @@ from bunnet import init_bunnet
 from core.config import db_async, db_sync, settings
 from fastapi import APIRouter, BackgroundTasks, HTTPException ,Depends
 from fastapi.responses import JSONResponse, Response
-from models.chat_model import ChatModel
-from schema.chat_model import CreateChatModel
+from models.chat_model import Asisstant
+from schema.chat_model import CreateAsisstant
 from schema.promt_engine import PromtEngine
 from schema.model_setting import ModelSetting
 from bunnet import PydanticObjectId
@@ -14,19 +14,20 @@ chat_model_router = APIRouter(prefix="/chat-model", tags=["Chat Model"])
 
 
 @chat_model_router.post("/create")
-async def create_chat_model(data: CreateChatModel, background_tasks: BackgroundTasks ,user_id : str = Depends(get_current_user_id) ):
-    init_bunnet(database=db_sync, document_models=[ChatModel])
+async def create_chat_model(data: CreateAsisstant, background_tasks: BackgroundTasks ,user_id : str = Depends(get_current_user_id) ):
+    init_bunnet(database=db_sync, document_models=[Asisstant])
     id = str(ObjectId())
-    chat_model = ChatModel(
+    chat_model = Asisstant(
         user_id=user_id,
-        name=data.name,
+        asistant_name=data.name,
         decription_assistant =data.description_assistant,
         opening_greeting=data.opening_greeting,
         list_knowledge_base_id=data.list_knowledge_base_id,
         model=data.model,
-        prompt=data.prompt,
+        system_prompt =data.prompt,
         max_doc=data.max_doc,
-        temperature=data.temperature
+        temperature=data.temperature,
+        top_p = data.top_p
     )
     background_tasks.add_task(chat_model.insert)
     return JSONResponse(
@@ -37,10 +38,10 @@ async def create_chat_model(data: CreateChatModel, background_tasks: BackgroundT
 
 @chat_model_router.put("/update/{chat_model_id}")
 async def update_chat_model(
-    chat_model_id: str, data: CreateChatModel, background_tasks: BackgroundTasks
+    chat_model_id: str, data: CreateAsisstant, background_tasks: BackgroundTasks
 ):
-    init_bunnet(database=db_sync, document_models=[ChatModel])
-    chat_model = ChatModel.get(chat_model_id).run()
+    init_bunnet(database=db_sync, document_models=[Asisstant])
+    chat_model = Asisstant.get(chat_model_id).run()
 
     if not chat_model:
         raise HTTPException(status_code=404, detail="Chat model not found.")
@@ -56,15 +57,15 @@ async def update_chat_model(
 
 @chat_model_router.get("/list/{owner}")
 async def list_chat_models_by_owner(owner: str):
-    init_bunnet(database=db_sync, document_models=[ChatModel])
-    chat_models = ChatModel.find(ChatModel.owner == owner).to_list()
+    init_bunnet(database=db_sync, document_models=[Asisstant])
+    chat_models = Asisstant.find(Asisstant.owner == owner).to_list()
     return chat_models
 
 
 @chat_model_router.delete("/delete/{chat_model_id}")
 async def delete_chat_model(chat_model_id: str):
-    init_bunnet(database=db_sync, document_models=[ChatModel])
-    chat_model = ChatModel.get(chat_model_id).run()
+    init_bunnet(database=db_sync, document_models=[Asisstant])
+    chat_model = Asisstant.get(chat_model_id).run()
     if not chat_model:
         raise HTTPException(status_code=404, detail="Chat model not found.")
     chat_model.delete()

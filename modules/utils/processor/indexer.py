@@ -26,7 +26,7 @@ class Indexer:
         # Init Qdrant client + vectorstore
         self.vectorstore = qd_client
 
-    async def indexing(self, file_path: str):
+    async def indexing(self, file_path: str , knowledge_base_id: str = None):
         # bo sung logic đẩy file lên minio 
         parsed = self.parser.parse(file_path)
         print(f"✅ Parsed " , parsed)
@@ -39,7 +39,9 @@ class Indexer:
             PointStruct(
                 id=idx,
                 vector=data,
-                payload={"text": text},
+                payload={"text": text,
+                         "file_name": None ,
+                         "knowledge_base_id" : None},
             )
             for idx, (data, text) in enumerate(zip(text_embed, texts))
         ]

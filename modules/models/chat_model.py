@@ -8,17 +8,18 @@ from pydantic import Field
 # ----------------------------------------------
 
 
-class ChatModel(Document):
+class Asisstant(Document):
     id: Optional[PydanticObjectId] = Field(default=None, alias="_id")  # ⚡ fix lỗi _id
     user_id : PydanticObjectId
-    name: str = None
+    asistant_name: str = None
     decription_assistant : str = None 
     opening_greeting : str = None 
     list_knowledge_base_id : List[PydanticObjectId]
     model: str = "gpt-4o-mini"
-    prompt: str = None
+    system_prompt: str = None
     max_doc: int = 20
     temperature: float = 0.2
+    top_p : float = 0.5
     createdAt: Optional[datetime] = Field(default_factory=datetime.now)
     updatedAt: Optional[datetime] = Field(default_factory=datetime.now)
 
