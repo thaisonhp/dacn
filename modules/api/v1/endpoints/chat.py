@@ -22,9 +22,10 @@ async def generate_stream(
     try:
         # Chuẩn bị messages
         query = conversation_history[-1]["content"]
-        print("query",query)
         retrivaler = Indexer()
-        context = await retrivaler.search(query=query,limit=assistant_info.get('max_doc'),knowledge_base_id = assistant_info.get('list_knowledge_base_id'))
+        # print("Kiem tra assistant_info.get('list_knowledge_base_id')", assistant_info.get('list_knowledge_base_id'))
+        kb_ids = [str(kb_id) for kb_id in assistant_info.get('list_knowledge_base_id')]
+        context = await retrivaler.search(query=query,limit=assistant_info.get('max_doc'),knowledge_base_id = kb_ids)
         # print("CONTEXT",context)
         template = """
         Bạn là một trợ lý học tập thân thiện và cực kỳ hiểu tâm lý sinh viên.
@@ -99,7 +100,7 @@ async def chat_stream(conversation_id: str = Form(...), message: str = Form(...)
                 raise HTTPException(status_code=404, detail="Assistant not found")
         # Lấy lịch sử chat từ MongoDB
         conversation = await db_async["History"].find({"conversation_id": ObjectId(conversation_id)}).sort("_id", 1).to_list(length=None)
-        print("Full conversation:",conversation)
+        # print("Full conversation:",conversation)
         # Nếu không tìm thấy conversation, tạo mới
         if not conversation:
             conversation = []
