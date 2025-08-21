@@ -12,16 +12,19 @@ from openai.types.responses import ResponseTextDeltaEvent
 from utils.retrival import RetrievalPipeline
 from utils.processor.indexer import Indexer
 chat_router = APIRouter(prefix="/Chat", tags=["Chat"])
+
+assistant_info = None
+
 async def generate_stream(
     conversation_history: list[dict],
-    model: str = "gpt-4o-mini",
+    assistant_info: dict = None,
 ):
     try:
         # Chuẩn bị messages
         query = conversation_history[-1]["content"]
         print("query",query)
         retrivaler = Indexer()
-        context = await retrivaler.search(query=query,limit=3)
+        context = await retrivaler.search(query=query,limit=assistant_info.get('max_doc'))
         # print("CONTEXT",context)
         template = """
         Bạn là một trợ lý học tập thân thiện và cực kỳ hiểu tâm lý sinh viên.
@@ -55,9 +58,11 @@ async def generate_stream(
         print("MESSAGE:",messages)
         # Gọi streaming từ OpenAI
         stream =  openai_client.responses.create(
-            model=model,
+            model=assistant_info.get('model'),
             input=messages,
-            stream=True
+            stream=True,
+            temperature=assistant_info.get('temperature'),
+            top_p=assistant_info.get('top_p')
         )
 
         # Stream các chunk về client
@@ -77,22 +82,38 @@ async def stream_response(
     return StreamingResponse(generate_stream(conversation_history, model), media_type="text/event-stream")
 @chat_router.post("/chat/stream")
 async def chat_stream(conversation_id: str = Form(...), message: str = Form(...)):
+    global assistant_info
     try:
+        conversation = (
+        db_sync["Conversation"]
+        .find_one({"_id": ObjectId(conversation_id)})
+        )
+        print(conversation)
+         # Nếu chưa có thì load từ DB
+        if assistant_info is None:
+            assistant_info = await db_async["chat_models"].find_one(
+                {"_id": ObjectId((conversation.get('aisstant_id')))}
+            )
+            print("assistant_info",assistant_info)
+            if not assistant_info:
+                raise HTTPException(status_code=404, detail="Assistant not found")
         # Lấy lịch sử chat từ MongoDB
-        conversation = await db_async["History"].find_one({"conversation_id": ObjectId(conversation_id)})
-        
+        conversation = await db_async["History"].find({"conversation_id": ObjectId(conversation_id)}).sort("_id", 1).to_list(length=None)
+        print("Full conversation:",conversation)
         # Nếu không tìm thấy conversation, tạo mới
         if not conversation:
-            conversation = {
-                "_id": ObjectId(),
-                "messages": [],
-                "conversation_id":conversation_id[-1:-5],
-            }
+            conversation = []
         else :
             if len(conversation) > 3 : 
-                conversation = conversation[-1:-4]
+                conversation = conversation[-3:]
         # Tạo conversation_history từ messages trong DB
-        conversation_history = conversation.get("messages", [])
+        conversation_history = []
+        for history in conversation:
+            messages = history.get("messages", [])
+            if isinstance(messages, list):
+                conversation_history.extend(messages)  # thay vì append
+            else:
+                conversation_history.append(messages)
         print("conversation_history",conversation_history)
         # Thêm tin nhắn mới của người dùng
         user_message = {"role": "user", "content": message}
@@ -100,26 +121,34 @@ async def chat_stream(conversation_id: str = Form(...), message: str = Form(...)
         logger.debug(f"Updated conversation_history: {conversation_history}")
 
         # Gọi streaming response
-        model = "gpt-3.5-turbo"
+        model = assistant_info.get('model')
         # response = await stream_response(conversation_history, model)
 
         # Thu thập full response để lưu vào DB
         full_response = ""
-        result = generate_stream(conversation_history, model)
+        result = generate_stream(conversation_history, assistant_info)
         
         async for chunk in result:
             full_response += chunk
         print("FULL RESPONE",full_response)
         # Thêm response của AI vào lịch sử
+        # db_sync["History"].insert_one({
+        #     "_id": ObjectId(),
+        #     "conversation_id": ObjectId(conversation_id),
+        #     "role": "user",
+        #     "content": message,
+        # })
         if full_response:
             conversation_history.append({"role": "assistant", "content": full_response})
             print(conversation_history)
             # Cập nhật lịch sử chat vào MongoDB
             db_sync["History"].insert_one({
                 "_id": ObjectId(),
-                "messages": conversation_history,
-                "conversation_di" : ObjectId(conversation_id),
-        
+                "conversation_id": ObjectId(conversation_id),
+                "messages": [
+                    {"role": "user", "content": message},
+                    {"role": "assistant", "content": full_response},
+                ]
             })
 
         return full_response

@@ -10,8 +10,8 @@ from pydantic import Field
 
 class Conversation(Document):
     id: Optional[PydanticObjectId] = Field(default=None, alias="_id")  # ⚡ fix lỗi _id
-    chat_model: str
-    user: str
+    aisstant_id: str
+    name : str
     status: Literal["activate", "inactivate", "delete"] = "activate"
     openai_conversation_id: str | None = None
     share: bool = False

@@ -102,10 +102,9 @@ async def login(data: LoginSchema):
 
     if not user.check_password(data.password):
         raise HTTPException(status_code=400, detail="Mật khẩu không đúng")
-
     # tạo token JWT
     payload = {
-        "sub": str(user.id),
+        "sub": str(mongo_user_dict.get('_id')),
         "role": mongo_user_dict.get("role", "user") ,
         "exp": datetime.utcnow() + timedelta(hours=24)
     }
@@ -180,7 +179,6 @@ async def reset_password(data: ResetPasswordSchema):
 
     if not user.check_password(data.old_password):
         raise HTTPException(status_code=400, detail="Mật khẩu cũ không đúng")
-
     # Update password
     user.set_password(data.new_password)
     await db_async["users"].update_one(

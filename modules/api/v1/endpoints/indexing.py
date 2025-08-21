@@ -31,21 +31,17 @@ async def index_file(
     # Đọc nội dung file vào bytes
     file_content = await file.read()
     file_stream = BytesIO(file_content)
-    # file_path = UPLOAD_DIR / file.filename
-    # with open(file_path, "wb") as buffer:
-    #     buffer.write(await file.read())
-    # # Index file vào Qdrant
     minio_processor = MinioManager()
     try :
         print("check minio")
         file_path = minio_processor.save_to_minio(file=file,file_stream=file_stream)
-        print(file_path)
+
     except Exception as e:
         raise HTTPException(status_code= 400, detail="False to save to minio") 
         
     try:
         count = await indexer.add_file(
-            file_path=str(file_path)
+            file_stream=file_stream, file_path=file_path 
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Indexing failed: {e}")
@@ -53,6 +49,5 @@ async def index_file(
     return {
         "message": "File uploaded and indexed",
         "filename": file.filename,
-        # "tenant_id": tenant_id,
         "indexed_chunks": count,
     }

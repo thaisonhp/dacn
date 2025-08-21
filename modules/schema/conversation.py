@@ -4,8 +4,8 @@ from pydantic import BaseModel
 
 
 class CreateConversation(BaseModel):
-    chat_model: str
-    user: str
+    aisstant_id: str
+    name : str
 
 
 class ListConversationOut(BaseModel):

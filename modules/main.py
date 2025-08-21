@@ -5,6 +5,7 @@ from api.api import api_v1
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
+from fastapi_pagination import add_pagination
 from api.v2.endpoints.auth import auth_router_v2  # Điều chỉnh đường dẫn theo dự án của bạn
 # from fastapi_pagination import add_pagination
 import os 
@@ -37,6 +38,7 @@ api.include_router(api_v1)
 api.add_middleware(GZipMiddleware, minimum_size=5000, compresslevel=3)
 api.add_middleware(SessionMiddleware, secret_key=os.getenv("SESSION_SECRET_KEY", "super-secret"))
 
+add_pagination(api)
 
 @api.get("/")
 async def root():

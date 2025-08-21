@@ -26,9 +26,9 @@ class Indexer:
         # Init Qdrant client + vectorstore
         self.vectorstore = qd_client
 
-    async def indexing(self, file_path: str , knowledge_base_id: str = None):
+    async def indexing(self, file_stream , file_path ,knowledge_base_id: list[str] = None):
         # bo sung logic đẩy file lên minio 
-        parsed = self.parser.parse(file_path)
+        parsed = self.parser.parse(file_stream)
         print(f"✅ Parsed " , parsed)
         chunks = self.text_splitter.chunk(parsed["text"], source_file=file_path)
         texts = [chunk.text for chunk in chunks]
@@ -40,8 +40,8 @@ class Indexer:
                 id=idx,
                 vector=data,
                 payload={"text": text,
-                         "file_name": None ,
-                         "knowledge_base_id" : None},
+                         "file_name": file_path.split("/")[-1] ,
+                         "knowledge_base_id" : knowledge_base_id},
             )
             for idx, (data, text) in enumerate(zip(text_embed, texts))
         ]
