@@ -153,7 +153,6 @@ async def validate_otp(data: ValidateOTPSchema):
 # ------------------- Reset mật khẩu bằng old_password -------------------
 class ResetPasswordSchema(BaseModel):
     email: EmailStr
-    old_password: str
     new_password: str
 
 @auth_router.post("/reset-password")
@@ -176,9 +175,6 @@ async def reset_password(data: ResetPasswordSchema):
         created_at=mongo_user_dict.get("created_at"),
         updated_at=datetime.utcnow(),
     )
-
-    if not user.check_password(data.old_password):
-        raise HTTPException(status_code=400, detail="Mật khẩu cũ không đúng")
     # Update password
     user.set_password(data.new_password)
     await db_async["users"].update_one(
