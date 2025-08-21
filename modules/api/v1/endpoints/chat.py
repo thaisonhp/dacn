@@ -24,7 +24,7 @@ async def generate_stream(
         query = conversation_history[-1]["content"]
         print("query",query)
         retrivaler = Indexer()
-        context = await retrivaler.search(query=query,limit=assistant_info.get('max_doc'))
+        context = await retrivaler.search(query=query,limit=assistant_info.get('max_doc'),knowledge_base_id = assistant_info.get('list_knowledge_base_id'))
         # print("CONTEXT",context)
         template = """
         Bạn là một trợ lý học tập thân thiện và cực kỳ hiểu tâm lý sinh viên.

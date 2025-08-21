@@ -55,11 +55,20 @@ class Indexer:
         # ======= sau khi xong het phan luu vao vector store thi bat dau luu vao minio va lay ra url luu vao db 
         return len(texts)
 
-    async def search(self, query: str, limit: int = 5)->List[str]:
+    async def search(self, query: str, limit: int = 5 , knowledge_base_id : List[str] = None)->List[str]:
+        filter_cond = models.Filter(
+            must=[
+                models.FieldCondition(
+                    key="knowledge_base_id",
+                    match=models.MatchAny(any=knowledge_base_id)
+                )
+            ]
+        )
         result = self.vectorstore.query_points(
             collection_name=settings.collection_name,
             query= self.embeder.client.embed_query(query),
             limit=limit,
+            query_filter=filter_cond
             # using="default" 
         ).points
         list_text = []

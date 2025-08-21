@@ -61,6 +61,11 @@ if not qd_client.collection_exists(settings.collection_name):
         )
 )
 print("Da tao colection ")
+qd_client.create_payload_index(
+            collection_name=settings.collection_name,
+            field_name="knowledge_base_id",
+            field_schema="keyword"  # vì ID dạng chuỗi
+        )
 # Cấu hình logger
 handler = logging.StreamHandler()
 # hoặc có thể dùng SysLogHandler...
