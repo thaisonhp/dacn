@@ -65,12 +65,17 @@ async def update_knowledge_base(
 @kb_router.get("/list")
 async def list_knowledge_bases_by_user(current_user_id: str = Depends(get_current_user_id)):
     """Lấy danh sách knowledge bases của một user"""
-    kbs = await KnowledgeBase.find(
-        KnowledgeBase.user_id == PydanticObjectId(current_user_id)
-    ).to_list()
+    cursor = db_sync['knowledge_bases'].find({"user_id": ObjectId(current_user_id)})
+    kbs = cursor.to_list(length=None)
 
     if not kbs:
         raise HTTPException(status_code=404, detail="Không tìm thấy knowledge base nào cho user này.")
+
+    # Convert ObjectId -> str để JSON hóa được
+    for kb in kbs:
+        kb["_id"] = str(kb["_id"])
+        if isinstance(kb.get("user_id"), ObjectId):
+            kb["user_id"] = str(kb["user_id"])
 
     return kbs
 
