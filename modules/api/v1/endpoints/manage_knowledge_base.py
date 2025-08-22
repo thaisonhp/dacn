@@ -62,15 +62,16 @@ async def update_knowledge_base(
     logger.info(f"Knowledge base {kb.name} updated successfully for user {kb.user_id}")
     return Response(status_code=200, content="Knowledge base updated successfully")
 
-@kb_router.get("/list/{user_id}")
-async def list_knowledge_bases_by_user(user_id: str, current_user_id: str = Depends(get_current_user_id)):
+@kb_router.get("/list")
+async def list_knowledge_bases_by_user(current_user_id: str = Depends(get_current_user_id)):
     """Lấy danh sách knowledge bases của một user"""
-    init_bunnet(database=db_sync, document_models=[KnowledgeBase])
-    if user_id != current_user_id:
-        logger.warning(f"User {current_user_id} attempted to list KBs for user {user_id}")
-        raise HTTPException(status_code=403, detail="Not authorized to list knowledge bases for this user")
+    kbs = await KnowledgeBase.find(
+        KnowledgeBase.user_id == PydanticObjectId(current_user_id)
+    ).to_list()
 
-    kbs = KnowledgeBase.find(KnowledgeBase.user_id == PydanticObjectId(user_id)).to_list()
+    if not kbs:
+        raise HTTPException(status_code=404, detail="Không tìm thấy knowledge base nào cho user này.")
+
     return kbs
 
 @kb_router.delete("/delete/{kb_id}")
