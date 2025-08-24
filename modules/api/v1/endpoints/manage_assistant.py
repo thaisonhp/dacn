@@ -124,7 +124,7 @@ async def get_chat_model(chat_model_id: str):
         content={
             "_id": str(chat_model.get("_id")),
             "user_id": str(chat_model.get("user_id")),
-            "assistant_name": chat_model.get("assistant_name"),
+            "assistant_name": chat_model.get("asistant_name"),
             "description_assistant": chat_model.get("description_assistant"),
             "opening_greeting": chat_model.get("opening_greeting"),
             "list_knowledge_base_id": [str(x) for x in chat_model.get("list_knowledge_base_id", [])],
