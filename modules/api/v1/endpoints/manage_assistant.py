@@ -18,7 +18,7 @@ def clean_assistant(item):
     cleaned = {}
 
     if "_id" in item:
-        cleaned["_id"] = str(item["_id"])
+        cleaned["id"] = str(item["_id"])  # đổi từ _id → id
     if "user_id" in item:
         cleaned["user_id"] = str(item["user_id"])
     if "assistant_name" in item:
