@@ -47,3 +47,5 @@ async def delete_file(file_id: str):
         raise HTTPException(status_code=404, detail="File not found")
     await doc.delete()
     return JSONResponse(content={"message": "File deleted successfully"})
+
+

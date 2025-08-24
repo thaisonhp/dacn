@@ -10,7 +10,7 @@ from pydantic import Field
 
 class Conversation(Document):
     id: Optional[PydanticObjectId] = Field(default=None, alias="_id")  # ⚡ fix lỗi _id
-    aisstant_id: str
+    assistant_id: str
     name : str
     status: Literal["activate", "inactivate", "delete"] = "activate"
     openai_conversation_id: str | None = None

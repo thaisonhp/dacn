@@ -1,11 +1,12 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional ,List
 from datetime import datetime
 
 class FileCreate(BaseModel):
     workspace_id: Optional[str] = None
     file_name: str
     file_path: str
+    know_ledgebase_id : List[str]
     size_kb: Optional[int] = None
 
 class FileUpdate(BaseModel):
