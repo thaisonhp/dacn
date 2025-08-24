@@ -11,7 +11,7 @@ from pydantic import Field
 class Asisstant(Document):
     id: Optional[PydanticObjectId] = Field(default=None, alias="_id")  # ⚡ fix lỗi _id
     user_id : PydanticObjectId
-    asistant_name: str = None
+    assistant_name: str = None
     decription_assistant : str = None 
     opening_greeting : str = None 
     list_knowledge_base_id : List[PydanticObjectId]
