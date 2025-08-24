@@ -12,6 +12,7 @@ from core.config import db_sync , db_async
 from bson.objectid import ObjectId
 from schema.file import FileCreate, FileUpdate, FileOut
 from models.file import File_Model
+from bunnet import init_bunnet
 
 index_router = APIRouter(prefix="/Index", tags=["Indexing"])
 
@@ -24,6 +25,7 @@ UPLOAD_DIR = Path("file_upload")
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 
+init_bunnet(database=db_sync, document_models=[File_Model])
 
 @index_router.post("/api/index")
 async def index_files(
@@ -72,6 +74,15 @@ async def index_files(
                 file_path=file_path,
                 knowledge_base_id=knowledge_base_id
             )
+            # them file to mongo db 
+            file_name = file_path.split("/")[-1]
+            print(file_name)
+            result_save_to_mongo = File_Model(
+                knowledge_base_id = knowledge_base_id , 
+                file_name=file_name,
+                file_path = file_path
+            )
+            result_save_to_mongo.insert()
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Indexing failed for {file.filename}: {e}")
 

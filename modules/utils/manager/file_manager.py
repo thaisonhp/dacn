@@ -50,7 +50,7 @@ class MinioManager:
 
             # Tạo URL đầy đủ
             minio_endpoint = settings.minio_endpoint or "localhost:9001"
-            file_url = f"http://{minio_endpoint}/{self.bucket_name}/{object_name}"
+            file_url = f"http://{minio_endpoint}/browser/{self.bucket_name}/origin%2F{object_name}"
             logger.debug(f"Generated file URL: {file_url}")
             return file_url
 

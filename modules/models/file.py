@@ -1,14 +1,14 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional , List
 import pytz
 from bunnet import Document, PydanticObjectId
 from pydantic import Field
 
 class File_Model(Document):
     id: Optional[PydanticObjectId] = Field(default=None, alias="_id")
-    workspace_id: Optional[PydanticObjectId] = None
+    knowledge_base_id: Optional[List[str]] = None
     file_name: str
-    file_type: str
+    file_type: Optional[str] = None
     file_path: str
     size_kb: Optional[int] = None
     uploaded_at: Optional[datetime] = Field(default_factory=lambda: datetime.now(pytz.timezone("Asia/Ho_Chi_Minh")))
