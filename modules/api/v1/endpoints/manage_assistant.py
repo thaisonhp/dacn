@@ -21,10 +21,10 @@ def clean_assistant(item):
         cleaned["_id"] = str(item["_id"])
     if "user_id" in item:
         cleaned["user_id"] = str(item["user_id"])
-    if "assistant_name" in item:
-        cleaned["assistant_name"] = item["assistant_name"]
-    if "description_assistant" in item:
-        cleaned["description_assistant"] = item["description_assistant"]
+    if "asistant_name" in item:
+        cleaned["asistant_name"] = item["asistant_name"]
+    if "decription_assistant" in item:
+        cleaned["decription_assistant"] = item["decription_assistant"]
     if "opening_greeting" in item:
         cleaned["opening_greeting"] = item["opening_greeting"]
     if "list_knowledge_base_id" in item:
@@ -125,7 +125,7 @@ async def get_chat_model(chat_model_id: str):
             "_id": str(chat_model.get("_id")),
             "user_id": str(chat_model.get("user_id")),
             "assistant_name": chat_model.get("asistant_name"),
-            "description_assistant": chat_model.get("description_assistant"),
+            "description_assistant": chat_model.get("decription_assistant"),
             "opening_greeting": chat_model.get("opening_greeting"),
             "list_knowledge_base_id": [str(x) for x in chat_model.get("list_knowledge_base_id", [])],
             "model": chat_model.get("model"),
