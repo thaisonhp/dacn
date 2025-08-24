@@ -86,22 +86,16 @@ async def list_conversations(
         .to_list()
     )
     print(conversations)
-    # conversations = (
-    #     await db_async["Conversation"]
-    #     .find({"user": user, "deleted": False, "chat_model": chat_model})
-    #     .sort("createdAt", -1)
-    #     .to_list()
-    # )
+
     return paginate([(item) for item in conversations])
 
 
 @conversation_router.delete("/conversation/{conversation_id}")
 async def delete_conversation(conversation_id: str):
-    result = await db_async["Conversation"].update_one(
-        {"_id": ObjectId(conversation_id)},
-        {"$set": {"deleted": True, "updatedAt": datetime.now()}},
+    result = await db_async["Conversation"].delete_one(
+        {"_id": ObjectId(conversation_id)}
     )
-    if result.matched_count == 0:
+    if result.deleted_count == 0:
         return JSONResponse(
             status_code=404, content={"message": "Conversation not found."}
         )
