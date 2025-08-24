@@ -65,7 +65,7 @@ async def create_chat_model(data: CreateAsisstant, background_tasks: BackgroundT
     background_tasks.add_task(chat_model.insert)
     return JSONResponse(
         status_code=201,
-        content={"id": id, "message": "Chat model created successfully."},
+        content={"id": id, "message": "Chat model created successfully." , "assistant_name" : data.assistant_name},
     )
 
 
