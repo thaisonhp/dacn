@@ -152,7 +152,11 @@ async def chat_stream(conversation_id: str = Form(...), message: str = Form(...)
                 ]
             })
 
-        return full_response
+        # return full_response
+        return StreamingResponse(
+        generate_stream(conversation_history, assistant_info),
+        media_type="text/event-stream"
+    )
 
     except Exception as e:
         logger.error(f"❌ Lỗi khi xử lý chat: {e}")
