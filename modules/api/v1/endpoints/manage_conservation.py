@@ -43,7 +43,7 @@ async def create_conversation(
         raise HTTPException(status_code=404, detail="Chat model not found.")
     id = ObjectId()
     conversation = Conversation(
-        aisstant_id=data.aisstant_id,
+        assisstant_id=data.assisstant_id,
         id=str(id),
         name=data.name
     )
@@ -108,3 +108,11 @@ async def delete_conversation(conversation_id: str):
     return JSONResponse(
         status_code=200, content={"message": "Conversation deleted successfully."}
     )
+
+
+@conversation_router.get("/conversation/{conversation_id}")
+async def get_conversation_by_id(conversation_id: str):
+    conversation = await db_async["Conversation"].find_one({"_id": ObjectId(conversation_id)})
+    if not conversation:
+        return JSONResponse(status_code=404, content={"message": "Conversation not found."})
+    return clean_conversation_item(conversation)
