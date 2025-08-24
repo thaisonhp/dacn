@@ -105,6 +105,7 @@ async def login(data: LoginSchema):
     # tạo token JWT
     payload = {
         "sub": str(mongo_user_dict.get('_id')),
+        'user_name' : mongo_user_dict.get('username'),
         "role": mongo_user_dict.get("role", "user") ,
         "exp": datetime.utcnow() + timedelta(hours=24)
     }

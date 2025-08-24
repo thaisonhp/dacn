@@ -8,6 +8,8 @@ from api.v1.endpoints.chat import chat_router
 from api.v1.endpoints.auth import auth_router
 from api.v2.endpoints.auth import auth_router_v2
 from api.v1.endpoints.manage_knowledge_base import kb_router
+from api.v1.endpoints.manage_account import user_router
+from api.v1.endpoints.manage_file import file_router
 # --------------------------------------
 api_v1 = APIRouter()
 
@@ -19,3 +21,5 @@ api_v1.include_router(chat_router)
 api_v1.include_router(auth_router)
 api_v1.include_router(auth_router_v2)
 api_v1.include_router(kb_router)
+api_v1.include_router(user_router)
+api_v1.include_router(file_router)

@@ -21,8 +21,8 @@ def clean_assistant(item):
         cleaned["_id"] = str(item["_id"])
     if "user_id" in item:
         cleaned["user_id"] = str(item["user_id"])
-    if "asistant_name" in item:
-        cleaned["asistant_name"] = item["asistant_name"]
+    if "assistant_name" in item:
+        cleaned["assistant_name"] = item["assistant_name"]
     if "decription_assistant" in item:
         cleaned["decription_assistant"] = item["decription_assistant"]
     if "opening_greeting" in item:
@@ -52,7 +52,7 @@ async def create_chat_model(data: CreateAsisstant, background_tasks: BackgroundT
     id = str(ObjectId())
     chat_model = Asisstant(
         user_id=user_id,
-        asistant_name=data.assistant_name,
+        assistant_name=data.assistant_name,
         decription_assistant =data.description_assistant,
         opening_greeting=data.opening_greeting,
         list_knowledge_base_id=data.list_knowledge_base_id,
@@ -124,7 +124,7 @@ async def get_chat_model(chat_model_id: str):
         content={
             "_id": str(chat_model.get("_id")),
             "user_id": str(chat_model.get("user_id")),
-            "assistant_name": chat_model.get("asistant_name"),
+            "assistant_name": chat_model.get("assistant_name"),
             "description_assistant": chat_model.get("decription_assistant"),
             "opening_greeting": chat_model.get("opening_greeting"),
             "list_knowledge_base_id": [str(x) for x in chat_model.get("list_knowledge_base_id", [])],

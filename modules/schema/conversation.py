@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 
 class CreateConversation(BaseModel):
-    aisstant_id: str
+    assisstant_id: str
     name : str
 
 
