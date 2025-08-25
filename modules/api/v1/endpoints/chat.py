@@ -93,7 +93,7 @@ async def chat_stream(conversation_id: str = Form(...), message: str = Form(...)
          # Nếu chưa có thì load từ DB
         if assistant_info is None:
             assistant_info = await db_async["chat_models"].find_one(
-                {"_id": ObjectId((conversation.get('aisstant_id')))}
+                {"_id": ObjectId((conversation.get('assistant_id')))}
             )
             print("assistant_info",assistant_info)
             if not assistant_info:
