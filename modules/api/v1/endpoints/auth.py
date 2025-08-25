@@ -87,6 +87,7 @@ async def login(data: LoginSchema):
     if mongo_user_dict is None:
         raise HTTPException(status_code=400, detail="Tài khoản không tồn tại")
     user = User(
+        _id=mongo_user_dict.get("_id"),
         username=mongo_user_dict.get("username"),
         email=mongo_user_dict.get("email"),
         full_name=mongo_user_dict.get("full_name"),
