@@ -84,7 +84,7 @@ async def update_user(user_id: str, data: UserUpdate):
     update_data["updated_at"] = datetime.utcnow()
     doc.set(update_data)
     doc.save()
-    UserOut(
+    return UserOut(
             id=str(doc.id),
             username=doc.username,
             full_name=doc.full_name,
