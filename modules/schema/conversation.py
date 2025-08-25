@@ -1,5 +1,8 @@
 from pydantic import BaseModel
-
+from pydantic import BaseModel, Field
+from typing import List
+from bson import ObjectId
+from pydantic import ConfigDict
 # ----------------------------------------
 
 
@@ -7,15 +10,15 @@ class CreateConversation(BaseModel):
     assistant_id: str
     name : str
 
+class Message(BaseModel):
+    role: str
+    content: str
 
-class ListConversationOut(BaseModel):
+class MessageOut(BaseModel):
     conversation_id: str
-    chat_model: str
-    user: str
-    status: str
-    openai_conversation_id: str | None = None
-    share: bool = False
-    name: str | None = None
-    deleted: bool = False
-    createdAt: str
-    updatedAt: str
+    messages: List[Message]
+
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        json_encoders={ObjectId: str},
+    )

@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 from fastapi_pagination import Page, paginate
 from models.conversatition import Conversation
 from models.history import History
-from schema.conversation import CreateConversation, ListConversationOut
+from schema.conversation import CreateConversation, MessageOut
 
 # -------------------------------------------------------
 
@@ -91,19 +91,25 @@ async def get_conversation(conversation_id: str):
     return JSONResponse(status_code=404, content={"message": "Conversation not found."})
 
 
-@conversation_router.get("/conversation/list_answer")
-async def list_conversations(
-    # user: str = Query(...), chat_model: str = Query(...)
-    conversation_id: str
-) -> Page[ListConversationOut]:
-    conversations = (
-        await db_async["History"]
-        .find({"conversation_id": ObjectId(conversation_id)})
-        .to_list()
-    )
-    print(conversations)
+@conversation_router.get(
+    "/conversation/list_answer",
+    response_model=Page[MessageOut]
+)
+async def list_conversations(conversation_id: str = Query(...)) -> Page[MessageOut]:
+    docs = await db_async["History"] \
+               .find({"conversation_id": ObjectId(conversation_id)}) \
+               .to_list()
 
-    return paginate([(item) for item in conversations])
+    # Convert từng doc để phù hợp model
+    items = []
+    for d in docs:
+        item = {
+            "conversation_id": str(d.get("conversation_id", "")),
+            "messages": d.get("messages", [])
+        }
+        items.append(item)
+
+    return paginate(items)
 
 
 @conversation_router.delete("/conversation/{conversation_id}")
