@@ -14,8 +14,8 @@ class UserCreate(BaseModel):
 
 class UserUpdate(BaseModel):
     full_name: str | None = None
-    avatar_url: str | None = None
-
+    username : str | None = None 
+    role : Literal["user", "admin"] = "user" 
 class UserOut(BaseModel):
     id: str
     username : str
