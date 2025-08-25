@@ -18,7 +18,9 @@ class UserUpdate(BaseModel):
 
 class UserOut(BaseModel):
     id: str
+    username : str
     full_name: str
     email: str
+    role : str
     created_at: datetime
     updated_at: datetime

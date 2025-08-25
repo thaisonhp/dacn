@@ -46,8 +46,10 @@ async def list_users():
     return [
         UserOut(
             id=str(doc.id),
+            username=doc.username,
             full_name=doc.full_name,
             email=doc.email,
+            role=doc.role,
             avatar_url=doc.avatar_url,
             created_at=doc.created_at,
             updated_at=doc.updated_at
@@ -62,12 +64,15 @@ async def get_user(user_id: str):
     if not doc:
         raise HTTPException(status_code=404, detail="User not found")
     return UserOut(
-        id=str(doc.id),
-        full_name=doc.full_name,
-        email=doc.email,
-        created_at=doc.created_at,
-        updated_at=doc.updated_at
-    )
+            id=str(doc.id),
+            username=doc.username,
+            full_name=doc.full_name,
+            email=doc.email,
+            role=doc.role,
+            avatar_url=doc.avatar_url,
+            created_at=doc.created_at,
+            updated_at=doc.updated_at
+        )
 
 # --- Update user ---
 @user_router.put("/{user_id}", response_model=UserOut)
@@ -79,14 +84,16 @@ async def update_user(user_id: str, data: UserUpdate):
     update_data["updated_at"] = datetime.utcnow()
     doc.set(update_data)
     doc.save()
-    return UserOut(
-        id=str(doc.id),
-        full_name=doc.full_name,
-        email=doc.email,
-        avatar_url=doc.avatar_url,
-        created_at=doc.created_at,
-        updated_at=doc.updated_at
-    )
+    UserOut(
+            id=str(doc.id),
+            username=doc.username,
+            full_name=doc.full_name,
+            email=doc.email,
+            role=doc.role,
+            avatar_url=doc.avatar_url,
+            created_at=doc.created_at,
+            updated_at=doc.updated_at
+        )
 
 # --- Delete user ---
 @user_router.delete("/{user_id}")

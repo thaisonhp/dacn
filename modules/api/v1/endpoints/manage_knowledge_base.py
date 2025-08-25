@@ -69,49 +69,25 @@ async def update_knowledge_base(
 @kb_router.get("/list")
 async def list_knowledge_bases_by_user(current_user_id: str = Depends(get_current_user_id)):
     """Lấy danh sách knowledge bases của một user"""
-    # cursor = db_sync['knowledge_bases'].find({"user_id": ObjectId(current_user_id)})
-    # kbs = cursor.to_list(length=None)
+    cursor = db_sync['knowledge_bases'].find({"user_id": ObjectId(current_user_id)})
+    kbs = cursor.to_list(length=None)
 
-    # if not kbs:
-    #     raise HTTPException(status_code=404, detail="Không tìm thấy knowledge base nào cho user này.")
-
-    # # Convert ObjectId -> str để JSON hóa được
-    # for kb in kbs:
-    #     kb["_id"] = str(kb["_id"])
-    #     if isinstance(kb.get("user_id"), ObjectId):
-    #         kb["user_id"] = str(kb["user_id"])
-
-    # return kbs
-    kbs = await db_async['knowledge_bases'] \
-        .find({"user_id": ObjectId(current_user_id)}) \
-        .to_list(length=None)
     if not kbs:
         raise HTTPException(status_code=404, detail="Không tìm thấy knowledge base nào cho user này.")
 
-    # Convert ObjectId -> str
+    # Convert ObjectId -> str để JSON hóa được
     for kb in kbs:
         kb["_id"] = str(kb["_id"])
         if isinstance(kb.get("user_id"), ObjectId):
             kb["user_id"] = str(kb["user_id"])
 
-    # 2. Aggregation trên collection 'files' để đếm số file theo KB
-    kb_ids = [kb["_id"] for kb in kbs]
-    pipeline = [
-        {"$match": {"knowledge_base_id": {"$in": [ObjectId(id_) for id_ in kb_ids]}}},
-        {"$group": {"_id": "$knowledge_base_id", "count": {"$sum": 1}}}
-    ]
-    agg = await db_async["files"].aggregate(pipeline).to_list(length=None)
-
-    # 3. Map kết quả đếm vào từng KB
-    counts_map = {str(doc["_id"]): doc["count"] for doc in agg}
+    # Build result trả về
     result = []
     for kb in kbs:
-        result.append({
-            "kbs" : kbs ,                # nếu có field name
-            "file_count": counts_map.get(kb["_id"], 0),
-            # add thêm field khác nếu bạn muốn
-        })
-        kb['file_count'] = counts_map.get(kb["_id"], 0)
+        cursor = db_async["files"].find({"knowledge_base_id":kb.get("_id")})   # find_all() ❌ → find({})
+        docs = await cursor.to_list(length=None)
+        kb["file_count"] = len(docs)
+    print(kbs)
     return kbs
 
 @kb_router.delete("/delete/{kb_id}")
