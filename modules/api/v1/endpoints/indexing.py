@@ -21,10 +21,6 @@ index_router = APIRouter(prefix="/Index", tags=["Indexing"])
 indexer = IndexingPipeline(collection_name=settings.collection_name)
 
 
-UPLOAD_DIR = Path("file_upload")
-UPLOAD_DIR.mkdir(exist_ok=True)
-
-
 init_bunnet(database=db_sync, document_models=[File_Model])
 
 @index_router.post("/api/index")

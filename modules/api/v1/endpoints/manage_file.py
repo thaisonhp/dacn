@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from typing import List
 from bunnet import init_bunnet
-from core.config import db_sync ,db_async
+from core.config import db_sync ,db_async , minio_client
 from models.file import File_Model
 from schema.file import FileCreate, FileUpdate, FileOut
 from datetime import timedelta ,datetime
@@ -96,16 +96,16 @@ async def delete_file(file_id: str):
     return JSONResponse(content={"message": "File deleted successfully"})
 
 
-# @file_router.get("/preview/{file_path:path}")
-# async def preview_file(file_path: str):
-#     try:
-#         # file_path ví dụ: "origin/7_TH1.docx"
-#         url = minio_client.presigned_get_object(
-#             bucket_name="chatbot-embeddings",
-#             object_name=file_path.split("/")[-1],
-#             expires=timedelta(hours=1)   # link sống trong 1 tiếng
-#         )
-#         return {"preview_url": url}
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"Không tạo được preview URL: {e}")
+@file_router.get("/preview/{file_path:path}")
+async def preview_file(file_path: str):
+    try:
+        # file_path ví dụ: "origin/7_TH1.docx"
+        url = minio_client.presigned_get_object(
+            bucket_name="chatbot-embeddings",
+            object_name=file_path.split("/")[-1],
+            expires=timedelta(hours=1)   # link sống trong 1 tiếng
+        )
+        return {"preview_url": url}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Không tạo được preview URL: {e}")
 
