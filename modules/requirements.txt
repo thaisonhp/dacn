@@ -15,3 +15,11 @@ langchain-community
 langchain_qdrant
 fastembed
 langchain_huggingface
+miniopy-async
+motor
+bunnet
+minio
+python-jose
+bcrypt
+Authlib
+itsdangerous

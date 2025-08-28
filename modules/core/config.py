@@ -16,7 +16,8 @@ from bunnet import init_bunnet
 from dotenv import load_dotenv
 from loguru import logger
 from openai import AsyncOpenAI
-
+from qdrant_client.models import Distance, VectorParams, models
+from fastembed import TextEmbedding, LateInteractionTextEmbedding, SparseTextEmbedding 
 load_dotenv()
 
 
@@ -35,7 +36,7 @@ class Settings(BaseSettings):
     mongodb_db: str = os.getenv("MONGODB_DB", "testdb")
     embedding_model: str = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
     # Các biến môi trường khác nếu cần thiết
-    minio_endpoint: str = os.getenv("MINIO_ENDPOINT", "http://localhost:9001")
+    minio_endpoint: str = os.getenv("MINIO_ENDPOINT", "http://localhost:9000")
     minio_access_key : str = os.getenv("MINIO_ACCESS_KEY")
     minio_secret_key : str = os.getenv("MINIO_SECRET_KEY")
     minio_bucket: str = os.getenv("MINIO_BUCKET", "mybucket")
@@ -51,16 +52,40 @@ class Settings(BaseSettings):
 
 settings = Settings()
 # khoi tao QdrantClient
-qd_client = QdrantClient(url=settings.qdrant_url, api_key=settings.qdrant_api_key)
-if not qd_client.collection_exists(settings.collection_name):
+# Map model -> embedding dimension
+MODEL_DIMENSIONS = {
+    "all-MiniLM-L6-v2": 384,           # sentence-transformers/all-MiniLM-L6-v2
+    "colbertv2.0": 128,                # tùy training, nhiều bản dùng 128
+}
+
+qd_client = QdrantClient(url=settings.qdrant_url, api_key=settings.qdrant_api_key ,timeout=300)
+dense_embedding_model = TextEmbedding("sentence-transformers/all-MiniLM-L6-v2")
+bm25_embedding_model = SparseTextEmbedding("Qdrant/bm25")
+late_interaction_embedding_model = LateInteractionTextEmbedding("colbert-ir/colbertv2.0")
+collections = [c.name for c in qd_client.get_collections().collections]
+if "hybrid-search" not in collections:
     qd_client.create_collection(
-    collection_name=settings.collection_name,
-    vectors_config=VectorParams( 
-            size=1536,
-            distance=Distance.COSINE,
-        )
-)
-print("Da tao colection ")
+        "hybrid-search",
+        vectors_config={
+            "all-MiniLM-L6-v2": models.VectorParams(
+                size=MODEL_DIMENSIONS["all-MiniLM-L6-v2"],
+                distance=models.Distance.COSINE,
+            ),
+            "colbertv2.0": models.VectorParams(
+                size=MODEL_DIMENSIONS["colbertv2.0"],
+                distance=models.Distance.COSINE,
+                multivector_config=models.MultiVectorConfig(
+                    comparator=models.MultiVectorComparator.MAX_SIM,
+                ),
+                hnsw_config=models.HnswConfigDiff(m=0)
+            ),
+        },
+        sparse_vectors_config={
+            "bm25": models.SparseVectorParams(modifier=models.Modifier.IDF)
+        }
+    )
+else:
+    print("Collection 'hybrid-search' đã tồn tại, bỏ qua tạo mới")
 qd_client.create_payload_index(
             collection_name=settings.collection_name,
             field_name="knowledge_base_id",

@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  mongo:
+    image: mongo:6.0
+    container_name: mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server --console-address ":9001" /data
+    ports:
+      - "9000:9000"  # API
+      - "9001:9001"  # Console
+    volumes:
+      - minio_data:/data
+
+  app:
+    build: .
+    container_name: chatbot_app
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "8053:8053"
+    depends_on:
+      - mongo
+      - minio
+    volumes:
+      - .:/app
+
+volumes:
+  mongo_data:
+  minio_data:

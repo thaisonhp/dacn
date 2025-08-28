@@ -9,7 +9,7 @@ class Chunk:
     text: str
 
 class ParagraphMarkdownChunker:
-    def __init__(self, chunk_size: int = 1000, chunk_overlap: int = 0):
+    def __init__(self, chunk_size: int = 2000, chunk_overlap: int = 1000):
         self.text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=chunk_size,
             chunk_overlap=chunk_overlap,
